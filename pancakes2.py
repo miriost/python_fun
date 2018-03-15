@@ -31,29 +31,37 @@ def convert_bin_to_sign(seq):
         outseq = outseq+conversion_dict[sign]
     return outseq
 
-def flip_sequence(seq, indexes, k,n):
+def choose_best(solutions):
+    # recieve a list of solutions and decide which one is the optimal one
+    solutions_n = [x for x in solutions if x!=False]
+    if solutions_n:
+        return(min(solutions_n))
+    else:
+        return(False)
     
-    if :
-        return flag, n
-    print('Current sequence: ' + convert_bin_to_sign(seq) + 'Indexes to flip:' + str(indexes) + 'k: '+str(k))
-    for index in indexes:
-        newseq = seq.copy()
-        for char in range(index, index+k):
-            newseq[char] = not(newseq[char])
-        if not False in newseq:
-            print('Possible! Flip index %d in string %s' %(index, convert_bin_to_sign(seq)))    
-            return(True,n)
+def flip_sequence(seq, index, k,n):
+    
+    #print('Current sequence: ' + convert_bin_to_sign(seq) + ' Index to flip:' + str(index) + ' k: '+str(k))
+
+    newseq = seq.copy()
+    for char in range(index, index+k):
+        newseq[char] = not(newseq[char])
+    if not False in newseq:
+        #print('Possible! Flip index %d in string %s' %(index, convert_bin_to_sign(seq)))    
+        return(n)
+    else:
+        newindexes = np.where(newseq == False)[0]
+        # reduce the indexes to only valid indexes- this should decrease with time
+        newindexes = [i if i+k <= len(newseq) else None for i in newindexes]
+        newindexes = [x for x in newindexes if x is not None]
+        if not newindexes: #no more indexes to check
+        #    print('Impossible')
+            return(False)
         else:
-            newindexes = np.where(newseq == False)[0]
-            # reduce the indexes to only valid indexes- this should decrease with time
-            newindexes = [i if i+k <= len(newseq) else None for i in newindexes]
-            newindexes = [x for x in newindexes if x is not None]
-            if not newindexes: #no more indexes to check
-                print('Impossible')
-                return(False,n)
-            else:
-                flag,n = flip_sequence(newseq, newindexes,k,False, n+1)          
-                 
+            solutions = [flip_sequence(newseq, i,k, n+1) for i in newindexes]
+            best_solution = choose_best(solutions)
+        #    print('intermidate result for %d: %s ' %(n+1, str(best_solution)))
+            return best_solution 
 def flip_pancakes(file):
     """
     Input:
@@ -76,37 +84,48 @@ or an integer representing the the minimum number of times you will need to use 
     for case in (range(filelen)):
         seq = f[case+1]
         seq, k = seq.split(" ")
-        binseq = convert_sign_to_bin(seq)
         k = int(k)
-        solution = 'IMPOSSIBLE'
-        if '-' not in seq:
-            solution = 0
-        elif '+' not in seq:
-            if len(seq)%k == 0:
-                solution = int(len(seq)/k)
-            else:
-                indexes = np.where(binseq==False)[0]
-                indexes = [i if i+k < len(binseq) else None for i in indexes]
-                indexes = [x for x in indexes if x is not None]   
-                if not indexes:
-                    solution = 'IMPOSSIBLE'
-                else:
-                    answer,n = flip_sequence(binseq, indexes, k, False, 1)
-                    if answer:
-                        solution = n
-                    else:
-                        solution = 'IMPOSSIBLE'
-        print("Case #%d: %s %s %s"%(case+1, seq, k, str(solution)))
+        binseq = convert_sign_to_bin(seq)
+        newindexes = np.where(binseq == False)[0]
+        # reduce the indexes to only valid indexes- this should decrease with time
+        newindexes = [i if i+k <= len(binseq) else None for i in newindexes]
+        newindexes = [x for x in newindexes if x is not None]
+        answer = [flip_sequence(binseq, i, 3, 1) for i in newindexes]
+        best_solution = choose_best(answer)
+        print('best solution '+str(best_solution))  
+#==============================================================================
+#         k = int(k)
+#         best_solution = False
+#         if '-' not in seq:
+#             best_solution = 0
+#         elif '+' not in seq:
+#             if len(seq)%k == 0:
+#                 best_solution = int(len(seq)/k)
+#         else:
+#             indexes = np.where(binseq==False)[0]
+#             indexes = [i if i+k <= len(binseq) else None for i in indexes]
+#             indexes = [x for x in indexes if x is not None]   
+#             if not indexes:
+#                 best_solution = False
+#             else:
+#                 solutions = [flip_sequence(binseq, indx, k, n=1) for indx in indexes]
+#                 best_solution = choose_best(solutions)
+#         print("Case #%d: %s %s %s"%(case+1, seq, k, str(best_solution)))
+#==============================================================================
     return(None)        
              
 if __name__ == '__main__':
     flip_pancakes('A-small-practice.in')
+   #flip_pancakes('1_example.txt')
 #==============================================================================
-# ===============================================================================
-#      a = '+++-++-+'
-#      b = convert_sign_to_bin(a)
-#      answer = flip_sequence(b, [3], 3)
-#          
-# ===============================================================================
+# 
+# 
+#     a = '---+'
+#     b = convert_sign_to_bin(a)
+#     answer = [flip_sequence(b, i, 3, 1) for i in [0,1]]
+#     best_solution = choose_best(answer)
+#     print('best solution '+str(best_solution))     
+# 
+# 
 # 
 #==============================================================================
